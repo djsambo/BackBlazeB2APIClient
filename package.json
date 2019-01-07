@@ -1,0 +1,22 @@
+{
+  "name": "BackBlazeB2APIClient",
+  "version": "1.0.0",
+  "description": "Simple client for Backblaze B2 Cloud Storage",
+  "main": "index.js",
+  "repository": "https://github.com/djsambo/BackBlazeB2APIClient.git",
+  "author": "Domingo Sambo <domingosambo@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "test": "mocha",
+    "test-debug": "mocha --inspect-brk",
+    "start": "node --inspect-brk index.js"
+  },
+  "dependencies": {
+    "is_js": "^0.9.0",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {
+    "@types/node": "^10.12.18"
+  }
+}
