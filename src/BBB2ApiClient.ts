@@ -134,7 +134,7 @@ app.createKey = (capabilities: string[], keyName: string, validDurationInSeconds
         if (!_configs.hasOwnProperty("authData")) {
             throw Error("You should authorize the account first.");
         } else if (is.not.inArray("writeKeys", _configs.authData.allowed.capabilities)) {
-            throw Error("You don't have permissions to create a buckets.");
+            throw Error("You don't have permissions to create buckets.");
         } else {
             request({
                 url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_create_key`,
@@ -161,21 +161,87 @@ app.createKey = (capabilities: string[], keyName: string, validDurationInSeconds
     });
 };
 
-app.deleteBucket = (): Promise<any> => {
+app.deleteBucket = (bucketId: string): Promise<any> => {
     return new Promise<any>((resolve, reject) => {
-
+        if (!_configs.hasOwnProperty("authData")) {
+            throw Error("You should authorize the account first.");
+        } else if (is.not.inArray("deleteBuckets", _configs.authData.allowed.capabilities)) {
+            throw Error("You don't have permissions to delete buckets.");
+        } else {
+            request({
+                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_delete_bucket`,
+                method: "POST",
+                headers: {"Authorization": _configs.authData.authorizationToken},
+                body: {
+                    accountId: _configs.accountId,
+                    bucketId
+                },
+                json: true
+            }, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else if (response.statusCode !== 200) {
+                    reject(body);
+                } else {
+                    resolve(body);
+                }
+            });
+        }
     });
 };
 
-app.deleteFileVersion = (): Promise<any> => {
+app.deleteFileVersion = (fileName: string, fileId: string): Promise<any> => {
     return new Promise<any>((resolve, reject) => {
-
+        if (!_configs.hasOwnProperty("authData")) {
+            throw Error("You should authorize the account first.");
+        } else if (is.not.inArray("deleteFiles", _configs.authData.allowed.capabilities)) {
+            throw Error("You don't have permissions to delete files.");
+        } else {
+            request({
+                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_delete_file_version`,
+                method: "POST",
+                headers: {"Authorization": _configs.authData.authorizationToken},
+                body: {
+                    fileName,
+                    fileId
+                },
+                json: true
+            }, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else if (response.statusCode !== 200) {
+                    reject(body);
+                } else {
+                    resolve(body);
+                }
+            });
+        }
     });
 };
 
-app.deleteKey = (): Promise<any> => {
+app.deleteKey = (applicationKeyId:string): Promise<any> => {
     return new Promise<any>((resolve, reject) => {
-
+        if (!_configs.hasOwnProperty("authData")) {
+            throw Error("You should authorize the account first.");
+        } else if (is.not.inArray("deleteKeys", _configs.authData.allowed.capabilities)) {
+            throw Error("You don't have permissions to delete keys.");
+        } else {
+            request({
+                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_delete_key`,
+                method: "POST",
+                headers: {"Authorization": _configs.authData.authorizationToken},
+                body: { applicationKeyId },
+                json: true
+            }, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else if (response.statusCode !== 200) {
+                    reject(body);
+                } else {
+                    resolve(body);
+                }
+            });
+        }
     });
 };
 
