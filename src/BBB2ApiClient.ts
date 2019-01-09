@@ -314,9 +314,29 @@ app.finishLargeFile = (fileId: string, partSha1Array: any[]): Promise<any> => {
     });
 };
 
-app.getDownloadAuthorization = (): Promise<any> => {
+app.getDownloadAuthorization = (bucketId: string, fileNamePrefix: string, validDurationInSeconds: number, b2ContentDisposition?: string): Promise<any> => {
     return new Promise<any>((resolve, reject) => {
-
+        if (!_configs.hasOwnProperty("authData")) {
+            throw Error("You should authorize the account first.");
+        } else if (is.not.inArray("shareFiles", _configs.authData.allowed.capabilities)) {
+            throw Error("You don't have permissions to get a download authorization.");
+        } else {
+            request({
+                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_get_download_authorization`,
+                method: "POST",
+                headers: {"Authorization": _configs.authData.authorizationToken},
+                body: {bucketId, fileNamePrefix, validDurationInSeconds, b2ContentDisposition},
+                json: true
+            }, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else if (response.statusCode !== 200) {
+                    reject(body);
+                } else {
+                    resolve(body);
+                }
+            });
+        }
     });
 };
 
