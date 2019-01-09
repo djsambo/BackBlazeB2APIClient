@@ -340,15 +340,55 @@ app.getDownloadAuthorization = (bucketId: string, fileNamePrefix: string, validD
     });
 };
 
-app.getFileInfo = (): Promise<any> => {
+app.getFileInfo = (fileId: string): Promise<any> => {
     return new Promise<any>((resolve, reject) => {
-
+        if (!_configs.hasOwnProperty("authData")) {
+            throw Error("You should authorize the account first.");
+        } else if (is.not.inArray("readFiles", _configs.authData.allowed.capabilities)) {
+            throw Error("You don't have permissions to get file info.");
+        } else {
+            request({
+                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_get_file_info`,
+                method: "POST",
+                headers: {"Authorization": _configs.authData.authorizationToken},
+                body: {fileId},
+                json: true
+            }, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else if (response.statusCode !== 200) {
+                    reject(body);
+                } else {
+                    resolve(body);
+                }
+            });
+        }
     });
 };
 
-app.getUploadPartUrl = (): Promise<any> => {
+app.getUploadPartUrl = (fileId: string): Promise<any> => {
     return new Promise<any>((resolve, reject) => {
-
+        if (!_configs.hasOwnProperty("authData")) {
+            throw Error("You should authorize the account first.");
+        } else if (is.not.inArray("writeFiles", _configs.authData.allowed.capabilities)) {
+            throw Error("You don't have permissions to get upload part url.");
+        } else {
+            request({
+                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_get_file_info`,
+                method: "POST",
+                headers: {"Authorization": _configs.authData.authorizationToken},
+                body: {fileId},
+                json: true
+            }, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else if (response.statusCode !== 200) {
+                    reject(body);
+                } else {
+                    resolve(body);
+                }
+            });
+        }
     });
 };
 
