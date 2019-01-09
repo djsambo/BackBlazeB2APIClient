@@ -219,7 +219,7 @@ app.deleteFileVersion = (fileName: string, fileId: string): Promise<any> => {
     });
 };
 
-app.deleteKey = (applicationKeyId:string): Promise<any> => {
+app.deleteKey = (applicationKeyId: string): Promise<any> => {
     return new Promise<any>((resolve, reject) => {
         if (!_configs.hasOwnProperty("authData")) {
             throw Error("You should authorize the account first.");
@@ -230,7 +230,7 @@ app.deleteKey = (applicationKeyId:string): Promise<any> => {
                 url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_delete_key`,
                 method: "POST",
                 headers: {"Authorization": _configs.authData.authorizationToken},
-                body: { applicationKeyId },
+                body: {applicationKeyId},
                 json: true
             }, (error, response, body) => {
                 if (error) {
@@ -245,9 +245,40 @@ app.deleteKey = (applicationKeyId:string): Promise<any> => {
     });
 };
 
-app.downloadFileById = (): Promise<any> => {
+app.downloadFileById = (fileId: string, range?: string, b2ContentDisposition?: string): Promise<any> => {
     return new Promise<any>((resolve, reject) => {
+        if (!_configs.hasOwnProperty("authData")) {
+            throw Error("You should authorize the account first.");
+        } else if (is.not.inArray("readFiles", _configs.authData.allowed.capabilities)) {
+            throw Error("You don't have permissions to download files.");
+        } else {
 
+            let headers: any = {"Authorization": _configs.authData.authorizationToken};
+
+            if (range) {
+                headers.range = range;
+            }
+
+            if (b2ContentDisposition) {
+                headers.b2ContentDisposition = b2ContentDisposition;
+            }
+
+            request({
+                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_download_file_by_id`,
+                method: "POST",
+                headers: headers,
+                body: {fileId},
+                json: true
+            }, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else if (response.statusCode !== 200) {
+                    reject(body);
+                } else {
+                    resolve(body);
+                }
+            });
+        }
     });
 };
 
