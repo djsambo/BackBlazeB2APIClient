@@ -13,6 +13,7 @@
 
 import * as request from "request";
 import * as is from "is_js";
+import {strict} from "assert";
 
 /**
  * Application prototype.
@@ -660,9 +661,44 @@ app.updateBucket = (bucketId: string, bucketType?: string, bucketInfo?: any, cor
     });
 };
 
-app.uploadFile = (): Promise<any> => {
+app.uploadFile = (xbzFileName: string,
+                  contentType: string,
+                  contentLength: string,
+                  xbzContentSha1: string,
+                  xbzInfoSrcLastModifiedMillis?: string,
+                  xbzInfoB2ContentDisposition?: string,
+                  xbzInfoX?: string): Promise<any> => {
     return new Promise<any>((resolve, reject) => {
-
+        if (!_configs.hasOwnProperty("authData")) {
+            throw Error("You should authorize the account first.");
+        } else if (is.not.inArray("writeBuckets", _configs.authData.allowed.capabilities)) {
+            throw Error("You don't have permissions to update bucket.");
+        } else {
+            request({
+                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_update_bucket`,
+                method: "POST",
+                headers: {
+                    "Authorization": _configs.authData.authorizationToken,
+                    "X-Bz-File-Name": xbzFileName,
+                    "Content-Type": contentType,
+                    "Content-Length": contentLength,
+                    "X-Bz-Content-Sha1": xbzContentSha1,
+                    "X-Bz-Info-src_last_modified_millis": xbzInfoSrcLastModifiedMillis,
+                    "X-Bz-Info-b2-content-disposition": xbzInfoB2ContentDisposition,
+                    "X-Bz-Info-*": xbzInfoX,
+                },
+                body: {},
+                json: true
+            }, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else if (response.statusCode !== 200) {
+                    reject(body);
+                } else {
+                    resolve(body);
+                }
+            });
+        }
     });
 };
 
