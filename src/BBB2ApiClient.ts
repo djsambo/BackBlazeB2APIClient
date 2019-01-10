@@ -423,10 +423,10 @@ app.hideFile = (bucketId: string, fileName: string): Promise<any> => {
         if (!_configs.hasOwnProperty("authData")) {
             throw Error("You should authorize the account first.");
         } else if (is.not.inArray("writeFiles", _configs.authData.allowed.capabilities)) {
-            throw Error("You don't have permissions to hide file.");
+            throw Error("You don't have permissions to hide files.");
         } else {
             request({
-                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_hide_file`,
+                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_list_buckets`,
                 method: "POST",
                 headers: {"Authorization": _configs.authData.authorizationToken},
                 body: {bucketId, fileName},
@@ -444,9 +444,29 @@ app.hideFile = (bucketId: string, fileName: string): Promise<any> => {
     });
 };
 
-app.listBuckets = (): Promise<any> => {
+app.listBuckets = (bucketId?: string, bucketName?: string, bucketTypes?: string[]): Promise<any> => {
     return new Promise<any>((resolve, reject) => {
-
+        if (!_configs.hasOwnProperty("authData")) {
+            throw Error("You should authorize the account first.");
+        } else if (is.not.inArray("listBuckets", _configs.authData.allowed.capabilities)) {
+            throw Error("You don't have permissions to list buckets.");
+        } else {
+            request({
+                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_list_buckets`,
+                method: "POST",
+                headers: {"Authorization": _configs.authData.authorizationToken},
+                body: {bucketId, bucketName, bucketTypes},
+                json: true
+            }, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else if (response.statusCode !== 200) {
+                    reject(body);
+                } else {
+                    resolve(body);
+                }
+            });
+        }
     });
 };
 
