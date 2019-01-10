@@ -626,9 +626,37 @@ app.startLargeFile = (bucketId: string, fileName: string, contentType: string, f
     });
 };
 
-app.updateBucket = (): Promise<any> => {
+app.updateBucket = (bucketId: string, bucketType?: string, bucketInfo?: any, corsRules?: any[], lifecycleRules?: any[], ifRevisionIs?: number): Promise<any> => {
     return new Promise<any>((resolve, reject) => {
-
+        if (!_configs.hasOwnProperty("authData")) {
+            throw Error("You should authorize the account first.");
+        } else if (is.not.inArray("writeBuckets", _configs.authData.allowed.capabilities)) {
+            throw Error("You don't have permissions to update bucket.");
+        } else {
+            request({
+                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_update_bucket`,
+                method: "POST",
+                headers: {"Authorization": _configs.authData.authorizationToken},
+                body: {
+                    accountId: _configs.accountId,
+                    bucketId,
+                    bucketType,
+                    bucketInfo,
+                    corsRules,
+                    lifecycleRules,
+                    ifRevisionIs
+                },
+                json: true
+            }, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else if (response.statusCode !== 200) {
+                    reject(body);
+                } else {
+                    resolve(body);
+                }
+            });
+        }
     });
 };
 
