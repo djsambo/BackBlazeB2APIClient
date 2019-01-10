@@ -548,9 +548,29 @@ app.listKeys = (maxKeyCount?: number, startApplicationKeyId?: string): Promise<a
     });
 };
 
-app.listParts = (): Promise<any> => {
+app.listParts = (fileId: string, startPartNumber?: number, maxPartCount?: number): Promise<any> => {
     return new Promise<any>((resolve, reject) => {
-
+        if (!_configs.hasOwnProperty("authData")) {
+            throw Error("You should authorize the account first.");
+        } else if (is.not.inArray("writeFiles", _configs.authData.allowed.capabilities)) {
+            throw Error("You don't have permissions to list parts.");
+        } else {
+            request({
+                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_list_parts`,
+                method: "POST",
+                headers: {"Authorization": _configs.authData.authorizationToken},
+                body: {fileId, startPartNumber, maxPartCount},
+                json: true
+            }, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else if (response.statusCode !== 200) {
+                    reject(body);
+                } else {
+                    resolve(body);
+                }
+            });
+        }
     });
 };
 
