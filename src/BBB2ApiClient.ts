@@ -392,9 +392,29 @@ app.getUploadPartUrl = (fileId: string): Promise<any> => {
     });
 };
 
-app.getUploadUrl = (): Promise<any> => {
+app.getUploadUrl = (bucketId: string): Promise<any> => {
     return new Promise<any>((resolve, reject) => {
-
+        if (!_configs.hasOwnProperty("authData")) {
+            throw Error("You should authorize the account first.");
+        } else if (is.not.inArray("writeFiles", _configs.authData.allowed.capabilities)) {
+            throw Error("You don't have permissions to get bucket upload url.");
+        } else {
+            request({
+                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_get_upload_url`,
+                method: "POST",
+                headers: {"Authorization": _configs.authData.authorizationToken},
+                body: {bucketId},
+                json: true
+            }, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else if (response.statusCode !== 200) {
+                    reject(body);
+                } else {
+                    resolve(body);
+                }
+            });
+        }
     });
 };
 
