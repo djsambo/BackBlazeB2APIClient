@@ -470,15 +470,55 @@ app.listBuckets = (bucketId?: string, bucketName?: string, bucketTypes?: string[
     });
 };
 
-app.listFileNames = (): Promise<any> => {
+app.listFileNames = (bucketId: string, startFileName?: string, maxFileCount?: number, prefix?: string, delimiter?: string): Promise<any> => {
     return new Promise<any>((resolve, reject) => {
-
+        if (!_configs.hasOwnProperty("authData")) {
+            throw Error("You should authorize the account first.");
+        } else if (is.not.inArray("listFiles", _configs.authData.allowed.capabilities)) {
+            throw Error("You don't have permissions to list files.");
+        } else {
+            request({
+                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_list_file_names`,
+                method: "POST",
+                headers: {"Authorization": _configs.authData.authorizationToken},
+                body: {bucketId, startFileName, maxFileCount, prefix, delimiter},
+                json: true
+            }, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else if (response.statusCode !== 200) {
+                    reject(body);
+                } else {
+                    resolve(body);
+                }
+            });
+        }
     });
 };
 
-app.listFileVersions = (): Promise<any> => {
+app.listFileVersions = (bucketId: string, startFileName?: string, startFileId?: string, maxFileCount?: number, prefix?: string, delimiter?: string): Promise<any> => {
     return new Promise<any>((resolve, reject) => {
-
+        if (!_configs.hasOwnProperty("authData")) {
+            throw Error("You should authorize the account first.");
+        } else if (is.not.inArray("listFiles", _configs.authData.allowed.capabilities)) {
+            throw Error("You don't have permissions to list files versions.");
+        } else {
+            request({
+                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_list_file_versions`,
+                method: "POST",
+                headers: {"Authorization": _configs.authData.authorizationToken},
+                body: {bucketId, startFileName, startFileId, maxFileCount, prefix, delimiter},
+                json: true
+            }, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else if (response.statusCode !== 200) {
+                    reject(body);
+                } else {
+                    resolve(body);
+                }
+            });
+        }
     });
 };
 
@@ -525,75 +565,6 @@ app.startLargeFile = (bucketId: string, fileName: string, contentType: string, f
         }
     });
 };
-
-// () {
-// }
-//
-// createKey() {
-// }
-//
-// deleteBucket() {
-// }
-//
-// deleteFileVersion() {
-// }
-//
-// deleteKey() {
-// }
-//
-// downloadFileById() {
-// }
-//
-// downloadFileByName() {
-// }
-//
-// finishLargeFile() {
-// }
-//
-// getDownloadAuthorization() {
-// }
-//
-// getFileInfo() {
-// }
-//
-// getUploadPartUrl() {
-// }
-//
-// getUploadUrl() {
-// }
-//
-// hideFile() {
-// }
-//
-// listBuckets() {
-// }
-//
-// listFileNames() {
-// }
-//
-// listFileVersions() {
-// }
-//
-// listKeys() {
-// }
-//
-// listParts() {
-// }
-//
-// listUnfinishedLargeFiles() {
-// }
-//
-// startLargeFile() {
-// }
-//
-// updateBucket() {
-// }
-//
-// uploadFile() {
-// }
-//
-// uploadPart() {
-// }
 
 app.updateBucket = (): Promise<any> => {
     return new Promise<any>((resolve, reject) => {
