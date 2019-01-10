@@ -663,7 +663,7 @@ app.updateBucket = (bucketId: string, bucketType?: string, bucketInfo?: any, cor
 
 app.uploadFile = (xbzFileName: string,
                   contentType: string,
-                  contentLength: string,
+                  contentLength: number,
                   xbzContentSha1: string,
                   xbzInfoSrcLastModifiedMillis?: string,
                   xbzInfoB2ContentDisposition?: string,
@@ -671,11 +671,11 @@ app.uploadFile = (xbzFileName: string,
     return new Promise<any>((resolve, reject) => {
         if (!_configs.hasOwnProperty("authData")) {
             throw Error("You should authorize the account first.");
-        } else if (is.not.inArray("writeBuckets", _configs.authData.allowed.capabilities)) {
-            throw Error("You don't have permissions to update bucket.");
+        } else if (is.not.inArray("writeFiles", _configs.authData.allowed.capabilities)) {
+            throw Error("You don't have permissions to upload file.");
         } else {
             request({
-                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_update_bucket`,
+                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_upload_file`,
                 method: "POST",
                 headers: {
                     "Authorization": _configs.authData.authorizationToken,
@@ -702,8 +702,33 @@ app.uploadFile = (xbzFileName: string,
     });
 };
 
-app.uploadPart = (): Promise<any> => {
+app.uploadPart = (xbzPartNumber: string, contentLength: number, xbzContentSha1: string): Promise<any> => {
     return new Promise<any>((resolve, reject) => {
-
+        if (!_configs.hasOwnProperty("authData")) {
+            throw Error("You should authorize the account first.");
+        } else if (is.not.inArray("writeFiles", _configs.authData.allowed.capabilities)) {
+            throw Error("You don't have permissions to upload part.");
+        } else {
+            request({
+                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_upload_part`,
+                method: "POST",
+                headers: {
+                    "Authorization": _configs.authData.authorizationToken,
+                    "X-Bz-Part-Number": xbzPartNumber,
+                    "Content-Length": contentLength,
+                    "X-Bz-Content-Sha1": xbzContentSha1
+                },
+                body: {},
+                json: true
+            }, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else if (response.statusCode !== 200) {
+                    reject(body);
+                } else {
+                    resolve(body);
+                }
+            });
+        }
     });
 };
