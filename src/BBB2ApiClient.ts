@@ -418,9 +418,29 @@ app.getUploadUrl = (bucketId: string): Promise<any> => {
     });
 };
 
-app.hideFile = (): Promise<any> => {
+app.hideFile = (bucketId: string, fileName: string): Promise<any> => {
     return new Promise<any>((resolve, reject) => {
-
+        if (!_configs.hasOwnProperty("authData")) {
+            throw Error("You should authorize the account first.");
+        } else if (is.not.inArray("writeFiles", _configs.authData.allowed.capabilities)) {
+            throw Error("You don't have permissions to hide file.");
+        } else {
+            request({
+                url: `${_configs.authData.apiUrl}${_configs.apiVersion}b2_hide_file`,
+                method: "POST",
+                headers: {"Authorization": _configs.authData.authorizationToken},
+                body: {bucketId, fileName},
+                json: true
+            }, (error, response, body) => {
+                if (error) {
+                    reject(error);
+                } else if (response.statusCode !== 200) {
+                    reject(body);
+                } else {
+                    resolve(body);
+                }
+            });
+        }
     });
 };
 
